@@ -6,10 +6,10 @@ const API = (() => {
   const getCart = () => fetch(URL + CART).then((data) => data.json());
   const getInventory = () => fetch(URL + INVENTORY).then((data) => data.json());
 
-  const addToCart = (inventoryItem) => {
+  const addToCart = (cart) => {
     return fetch(URL + CART, {
       method: "POST",
-      body: JSON.stringify(inventoryItem),
+      body: JSON.stringify(cart),
       headers: {
         "Content-Type": "application/json",
       },
@@ -206,7 +206,7 @@ const Controller = ((model, view) => {
         model.updateCart(id, cartItem.amount);
       }
       else {
-        cartItem = new Object(inventoryItem);
+        cartItem = {...inventoryItem};
         state.cart.push(cartItem);
         model.addToCart(cartItem);
       }
