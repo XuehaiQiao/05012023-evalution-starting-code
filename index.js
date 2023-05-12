@@ -206,6 +206,7 @@ const Controller = ((model, view) => {
 
       if (state.cart[id]) {
         state.cart[id].amount += state.inventory[id].amount;
+        model.updateCart(id, state.cart[id].amount);
       }
       else {
         state.cart[id] = new Object(state.inventory[id]);
@@ -215,7 +216,7 @@ const Controller = ((model, view) => {
       state.inventory[id].amount = 0;
 
 
-      model.updateCart(id, state.cart[id].amount);
+      
       view.renderCarts(state.cart);
       view.renderInventories(state.inventory);
     });
@@ -223,7 +224,13 @@ const Controller = ((model, view) => {
 
   const handleDelete = () => { };
 
-  const handleCheckout = () => { };
+  const handleCheckout = () => {
+    view.inventoryListEl.addEventListener("click", (event) => {
+      if (event.target.className !== "checkout-btn") return;
+
+      model.checkout();
+    })
+  };
 
   const bootstrap = () => {
     handleUpdateAmount();
