@@ -194,6 +194,7 @@ const Controller = ((model, view) => {
       if (event.target.className !== "addToCart-btn") return;
 
       let id = event.target.parentNode.getAttribute("item-id");
+      console.log('parent Id', id);
 
       // update state.cart
       let inventoryItem = state.inventory.find(item => item.id == id);
@@ -205,13 +206,13 @@ const Controller = ((model, view) => {
         model.updateCart(id, cartItem.amount);
       }
       else {
-        state.cart.push(new Object(inventoryItem));
-        model.addToCart(new Object(inventoryItem));
+        cartItem = new Object(inventoryItem);
+        state.cart.push(cartItem);
+        model.addToCart(cartItem);
       }
       
-      inventoryItem.amount = 0;
-      
       view.renderCarts(state.cart);
+      inventoryItem.amount = 0;
       view.renderInventories(state.inventory);   
     });
   };
@@ -221,9 +222,17 @@ const Controller = ((model, view) => {
       if (event.target.className !== "delete-btn") return;
 
       let id = event.target.parentNode.getAttribute("item-id");
-      delete state.cart.find(item => item.id == id);
-      model.deleteFromCart(id);
-      state.cart = [];
+
+      model.deleteFromCart(id).then(() => {
+        for(const i in state.cart) {
+          console.log(state.cart[i])
+          if(state.cart[i].id == id) {
+            state.cart.splice(i, 1);
+            break;
+          }
+        }
+        view.renderCarts(state.cart);
+      })
     });
   };
 
@@ -231,7 +240,7 @@ const Controller = ((model, view) => {
     view.checkOutBtn.addEventListener("click", (event) => {
       console.log("checkout");
       model.checkout().then(() => {
-        state.cart = {};
+        state.cart = [];
       })
     })
   };
