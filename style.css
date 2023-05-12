@@ -1,0 +1,51 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 15%;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    width: 70%;
+}
+
+#app {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    width: 100%;
+    height: 400px;
+    background-color: rgb(245, 245, 245);
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+.inventory-container {
+    flex: 1;
+    background-color: lightblue;
+    margin: 20px;
+}
+
+.cart-container {
+    flex: 1;
+    background-color: lightblue;
+    margin: 20px;
+}
+
+ul {
+    padding:15px;
+    margin: 0px;
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    gap:10px;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: beige;
+}
