@@ -50,9 +50,9 @@ const API = (() => {
 const Model = (() => {
   // implement your logic for Model
   class State {
-    #onChange;
-    #inventory;
-    #cart;
+    #onChange; // []
+    #inventory; // []
+    #cart; // []
     constructor() {
       this.#inventory = [];
       this.#cart = [];
@@ -66,18 +66,14 @@ const Model = (() => {
     }
 
     set cart(newCart) {
-      this.#cart = {}
-      newCart.forEach((cartItem) => {
-        this.#cart[cartItem.id] = cartItem;
-      })
+      this.#cart = newCart;
       this.#onChange();
     }
     set inventory(newInventory) {
-      this.#inventory = {}
-      newInventory.forEach((inventoryItem) => {
+      newInventory.forEach(inventoryItem => {
         inventoryItem.amount = 0;
-        this.#inventory[inventoryItem.id] = inventoryItem;
       })
+      this.#inventory = newInventory;
       this.#onChange();
     }
 
@@ -133,9 +129,7 @@ const View = (() => {
   const renderInventories = function (inventory) {
     console.log("Render inventories.");
     let temp = "";
-    for (const i in inventory) {
-      const inventoryItem = inventory[i];
-      const content = inventoryItem.content;
+    for (const inventoryItem of inventory) {
       const liTemp = Model.createInventoryLi(inventoryItem);
       temp += liTemp;
     }
@@ -147,7 +141,6 @@ const View = (() => {
     let temp = "";
     for (const i in cart) {
       const cartItem = cart[i];
-      const content = cartItem.content;
       const liTemp = Model.createCartLi(cartItem);
       temp += liTemp;
     }
@@ -182,13 +175,14 @@ const Controller = ((model, view) => {
     view.inventoryListEl.addEventListener("click", (event) => {
       if (event.target.className === "add-btn") {
         let id = event.target.parentNode.getAttribute("item-id");
-        state.inventory[id].amount += 1;
+        state.inventory.find(item => item.id == id).amount++;
         view.renderInventories(state.inventory);
       }
       else if (event.target.className === "reduce-btn") {
         let id = event.target.parentNode.getAttribute("item-id");
-        if (state.inventory[id].amount > 0) {
-          state.inventory[id].amount -= 1;
+        let item = state.inventory.find(item => item.id == id);
+        if (item.amount > 0) {
+          item.amount--;
           view.renderInventories(state.inventory);
         }
       }
@@ -202,33 +196,43 @@ const Controller = ((model, view) => {
       let id = event.target.parentNode.getAttribute("item-id");
 
       // update state.cart
-      if (state.inventory[id].amount === 0) return;
+      let inventoryItem = state.inventory.find(item => item.id == id);
+      if (inventoryItem.amount === 0) return;
 
-      if (state.cart[id]) {
-        state.cart[id].amount += state.inventory[id].amount;
-        model.updateCart(id, state.cart[id].amount);
+      let cartItem = state.cart.find(item => item.id == id);
+      if (cartItem) {
+        cartItem.amount += inventoryItem.amount;
+        model.updateCart(id, cartItem.amount);
       }
       else {
-        state.cart[id] = new Object(state.inventory[id]);
-        model.addToCart(state.cart[id]);
+        state.cart.push(new Object(inventoryItem));
+        model.addToCart(new Object(inventoryItem));
       }
-
-      state.inventory[id].amount = 0;
-
-
+      
+      inventoryItem.amount = 0;
       
       view.renderCarts(state.cart);
-      view.renderInventories(state.inventory);
+      view.renderInventories(state.inventory);   
     });
   };
 
-  const handleDelete = () => { };
+  const handleDelete = () => {
+    view.cartListEl.addEventListener("click", (event) => {
+      if (event.target.className !== "delete-btn") return;
+
+      let id = event.target.parentNode.getAttribute("item-id");
+      delete state.cart.find(item => item.id == id);
+      model.deleteFromCart(id);
+      state.cart = [];
+    });
+  };
 
   const handleCheckout = () => {
-    view.inventoryListEl.addEventListener("click", (event) => {
-      if (event.target.className !== "checkout-btn") return;
-
-      model.checkout();
+    view.checkOutBtn.addEventListener("click", (event) => {
+      console.log("checkout");
+      model.checkout().then(() => {
+        state.cart = {};
+      })
     })
   };
 
